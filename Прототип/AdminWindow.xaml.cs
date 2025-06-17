@@ -184,11 +184,11 @@ namespace Прототип
             if (dlg.ShowDialog() == true)
             {
                 BitmapImage bmp = new BitmapImage(new Uri(dlg.FileName));
-                if (bmp.PixelWidth > 300 || bmp.PixelHeight > 200)
-                {
-                    MessageBox.Show("Изображение должно быть не больше 300x200 пикселей.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                //if (bmp.PixelWidth > 300 || bmp.PixelHeight > 200)
+                //{
+                //    MessageBox.Show("Изображение должно быть не больше 300x200 пикселей.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                //    return;
+                //}
 
                 
                 string namePart = NameTextBox.Text.Trim().Replace(" ", "_");
