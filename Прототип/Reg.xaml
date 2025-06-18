@@ -42,10 +42,25 @@
                  GotFocus="logBox_GotFocus"
                  LostFocus="logBox_LostFocus"/>
 
-        <!-- Фамилия -->
-        <TextBox x:Name="lastNameBox"
+        <!-- Email -->
+        <TextBox x:Name="emailBox"
                  HorizontalAlignment="Center"
-                 Margin="0,152,0,0"
+                 Margin="0,148,0,0"   
+            VerticalAlignment="Top"
+                 VerticalContentAlignment="Center"
+                 Width="230"
+                 Height="28"
+                 FontSize="14"
+                 FontStyle="Italic"
+                 Text="Почта"
+                 Foreground="Gray"
+                 GotFocus="emailBox_GotFocus"
+                 LostFocus="emailBox_LostFocus"/>
+
+            <!-- Фамилия -->
+            <TextBox x:Name="lastNameBox"
+                 HorizontalAlignment="Center"
+                 Margin="0,184,0,0"
                  VerticalAlignment="Top"
                  VerticalContentAlignment="Center"
                  Width="230"
@@ -57,10 +72,10 @@
                  GotFocus="logBox_GotFocus"
                  LostFocus="logBox_LostFocus"/>
 
-        <!-- Имя -->
-        <TextBox x:Name="firstNameBox"
+            <!-- Имя -->
+            <TextBox x:Name="firstNameBox"
                  HorizontalAlignment="Center"
-                 Margin="0,192,0,0"
+                 Margin="0,222,0,0"
                  VerticalAlignment="Top"
                  VerticalContentAlignment="Center"
                  Width="230"
@@ -72,10 +87,10 @@
                  GotFocus="logBox_GotFocus"
                  LostFocus="logBox_LostFocus"/>
 
-        <!-- Отчество -->
-        <TextBox x:Name="middleNameBox"
+            <!-- Отчество -->
+            <TextBox x:Name="middleNameBox"
                  HorizontalAlignment="Center"
-                 Margin="0,232,0,0"
+                 Margin="0,262,0,0"
                  VerticalAlignment="Top"
                  VerticalContentAlignment="Center"
                  Width="230"
@@ -87,13 +102,13 @@
                  GotFocus="logBox_GotFocus"
                  LostFocus="logBox_LostFocus"/>
 
-        <Grid Width="230" Height="28"
-      HorizontalAlignment="Center"
-      VerticalAlignment="Top"
-      Margin="0,273,0,0">
+            <Grid Width="230" Height="28"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Margin="0,303,0,0">
 
-            <!-- PasswordBox -->
-            <PasswordBox x:Name="passwordBox"
+                <!-- PasswordBox -->
+                <PasswordBox x:Name="passwordBox"
                  FontSize="14"
                  FontStyle="Italic"
                  Padding="5,0,30,0"
@@ -104,20 +119,20 @@
                  Visibility="Visible"
                  Grid.ZIndex="1"/>
 
-            <!-- TextBox для отображения пароля -->
-            <TextBox x:Name="visiblePasswordBox"
-             FontSize="14"
-             FontStyle="Italic"
-             Padding="5,0,30,0"
-             VerticalContentAlignment="Center"
-             Visibility="Collapsed"
-             TextChanged="visiblePasswordBox_TextChanged"
-             GotFocus="VisiblePasswordBox_GotFocus"
-             LostFocus="VisiblePasswordBox_LostFocus"
-             Grid.ZIndex="1"/>
+                <!-- TextBox для отображения пароля -->
+                <TextBox x:Name="visiblePasswordBox"
+                 FontSize="14"
+                 FontStyle="Italic"
+                 Padding="5,0,30,0"
+                 VerticalContentAlignment="Center"
+                 Visibility="Collapsed"
+                 TextChanged="visiblePasswordBox_TextChanged"
+                 GotFocus="VisiblePasswordBox_GotFocus"
+                 LostFocus="VisiblePasswordBox_LostFocus"
+                 Grid.ZIndex="1"/>
 
-            <!-- Плейсхолдер -->
-            <TextBlock x:Name="passwordPlaceholder"
+                <!-- Плейсхолдер -->
+                <TextBlock x:Name="passwordPlaceholder"
                Text="Введите пароль"
                Foreground="Gray"
                FontStyle="Italic"
@@ -127,8 +142,8 @@
                IsHitTestVisible="False"
                Grid.ZIndex="2"/>
 
-            <!-- Глазик -->
-            <Button Width="24"
+                <!-- Глазик -->
+                <Button Width="24"
             Height="24"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
@@ -138,32 +153,32 @@
             Click="TogglePasswordVisibility"
             Cursor="Hand"
             Grid.ZIndex="3">
-                <TextBlock x:Name="eyeIcon" Text="👁" FontSize="14"/>
-            </Button>
-        </Grid>
+                    <TextBlock x:Name="eyeIcon" Text="👁" FontSize="14"/>
+                </Button>
+            </Grid>
 
 
-        <!-- Подтвердите пароль -->
-        <Grid Width="230" Height="28"
-      HorizontalAlignment="Center"
-      Margin="0,312,0,0"
-      VerticalAlignment="Top">
+            <!-- Подтвердите пароль -->
+            <Grid Width="230" Height="28"
+              HorizontalAlignment="Center"
+              Margin="0,342,0,0"
+              VerticalAlignment="Top">
 
-            <TextBox x:Name="visibleConfirmPasswordBox"
-             FontSize="14"
-             FontStyle="Italic"
-             VerticalContentAlignment="Center"
-             Visibility="Collapsed"
-             Padding="5,0,30,0"/>
+                <TextBox x:Name="visibleConfirmPasswordBox"
+                 FontSize="14"
+                 FontStyle="Italic"
+                 VerticalContentAlignment="Center"
+                 Visibility="Collapsed"
+                 Padding="5,0,30,0"/>
 
-            <PasswordBox x:Name="confirmPasswordBox"
+                <PasswordBox x:Name="confirmPasswordBox"
                  FontSize="14"
                  FontStyle="Italic"
                  VerticalContentAlignment="Center"
                  Padding="5,0,30,0"
                  PasswordChanged="confirmPasswordBox_PasswordChanged"/>
 
-            <TextBlock x:Name="confirmPlaceholder"
+                <TextBlock x:Name="confirmPlaceholder"
                Text="Подтвердите пароль"
                Foreground="Gray"
                FontStyle="Italic"
@@ -173,7 +188,7 @@
                Visibility="Visible"
                FontSize="14"/>
 
-            <Button Width="24"
+                <Button Width="24"
             Height="24"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
@@ -182,12 +197,12 @@
             BorderBrush="{x:Null}"
             Click="ToggleConfirmPasswordVisibility"
             Cursor="Hand">
-                <TextBlock x:Name="confirmEyeIcon" Text="👁" FontSize="14"/>
-            </Button>
-        </Grid>
+                    <TextBlock x:Name="confirmEyeIcon" Text="👁" FontSize="14"/>
+                </Button>
+            </Grid>
 
-        <!-- Кнопка Зарегистрироваться -->
-        <Button Content="Зарегистрироваться"
+            <!-- Кнопка Зарегистрироваться -->
+            <Button Content="Зарегистрироваться"
                 Width="230"
                 Height="35"
                 FontSize="16"

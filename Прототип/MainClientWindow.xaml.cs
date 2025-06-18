@@ -385,22 +385,22 @@ LEFT JOIN Manufacturers m ON p.ManufacturerID = m.ManufacturerID
 
         private void tovarDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            // Получаем объект товара, связанный со строкой
+            
             if (e.Row.Item is Tovar tovar)
             {
                 if (tovar.Stock == 0)
                 {
-                    // Если на складе нет, ставим голубой фон
-                    e.Row.Background = Brushes.LightBlue;
+                    
+                    e.Row.Background = Brushes.Gray;
                 }
-                else if (tovar.Discount > 15)
+                else if (tovar.Discount > 10)
                 {
-                    // Если скидка больше 15%, ставим зеленый фон (#7fff00)
+                    
                     e.Row.Background = (Brush)(new BrushConverter().ConvertFrom("#7fff00"));
                 }
                 else
                 {
-                    // Иначе стандартный фон (белый)
+                    
                     e.Row.Background = Brushes.White;
                 }
             }
@@ -471,7 +471,7 @@ LEFT JOIN Manufacturers m ON p.ManufacturerID = m.ManufacturerID
                 manufacturerFilterBox.Items.Add(man);
             }
 
-            manufacturerFilterBox.SelectedIndex = 0; // по умолчанию "Все производители"
+            manufacturerFilterBox.SelectedIndex = 0; 
         }
 
         private void searchBox_TextChanged(object sender, TextChangedEventArgs e)

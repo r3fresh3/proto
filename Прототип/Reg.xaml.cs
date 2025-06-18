@@ -184,29 +184,34 @@ namespace Прототип
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string login = logBox.Text.Trim();
+            string email = emailBox.Text.Trim(); // Получаем почту
             string password = passwordBox.Password.Trim();
             string confirmPassword = confirmPasswordBox.Password.Trim();
             string firstName = firstNameBox.Text.Trim();
             string lastName = lastNameBox.Text.Trim();
             string patronymic = middleNameBox.Text.Trim();
 
-            
-            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(confirmPassword) || string.IsNullOrWhiteSpace(firstName) ||
-                string.IsNullOrWhiteSpace(lastName))
+            // Проверяем обязательные поля, включая email
+            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword) ||
+                string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
             {
-                MessageBox.Show("Пожалуйста, заполните все обязательные поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Пожалуйста, заполните все обязательные поля, включая почту.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            
+            // Простая базовая проверка email (можно заменить на более сложную)
+            if (!email.Contains("@") || !email.Contains("."))
+            {
+                MessageBox.Show("Введите корректный email.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (password != confirmPassword)
             {
                 MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -214,7 +219,7 @@ namespace Прототип
                 {
                     conn.Open();
 
-                    
+                    // Проверяем, есть ли пользователь с таким логином
                     string checkUserQuery = "SELECT COUNT(*) FROM Users WHERE Login = @Login";
                     using (SqlCommand checkCmd = new SqlCommand(checkUserQuery, conn))
                     {
@@ -228,15 +233,30 @@ namespace Прототип
                         }
                     }
 
-                    
+                    // Проверяем, есть ли пользователь с таким email (если нужно)
+                    string checkEmailQuery = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+                    using (SqlCommand checkEmailCmd = new SqlCommand(checkEmailQuery, conn))
+                    {
+                        checkEmailCmd.Parameters.AddWithValue("@Email", email);
+                        int emailExists = (int)checkEmailCmd.ExecuteScalar();
+
+                        if (emailExists > 0)
+                        {
+                            MessageBox.Show("Пользователь с таким Email уже зарегистрирован.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+
+                    // Вставляем пользователя с email
                     string insertQuery = @"
-                INSERT INTO Users (Login, PasswordHash, FirstName, LastName, Patronymic, Role)
-                VALUES (@Login, @PasswordHash, @FirstName, @LastName, @Patronymic, @Role)";
+                INSERT INTO Users (Login, Email, PasswordHash, FirstName, LastName, Patronymic, Role)
+                VALUES (@Login, @Email, @PasswordHash, @FirstName, @LastName, @Patronymic, @Role)";
 
                     using (SqlCommand insertCmd = new SqlCommand(insertQuery, conn))
                     {
                         insertCmd.Parameters.AddWithValue("@Login", login);
-                        insertCmd.Parameters.AddWithValue("@PasswordHash", HashPassword(password)); 
+                        insertCmd.Parameters.AddWithValue("@Email", email);
+                        insertCmd.Parameters.AddWithValue("@PasswordHash", HashPassword(password));
                         insertCmd.Parameters.AddWithValue("@FirstName", firstName);
                         insertCmd.Parameters.AddWithValue("@LastName", lastName);
                         insertCmd.Parameters.AddWithValue("@Patronymic", patronymic);
@@ -246,17 +266,37 @@ namespace Прототип
                     }
 
                     MessageBox.Show("Регистрация прошла успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                    MainWindow mainWindow = new MainWindow(); // Заменить, если твоя форма называется иначе
+                    MainWindow mainWindow = new MainWindow(); // твоя главная форма
                     mainWindow.Show();
 
-                    
                     this.Close();
-
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Ошибка при регистрации: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+
+        private void emailBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            if (tb.Text == "Почта")
+            {
+                tb.Text = "";
+                tb.Foreground = Brushes.Black;
+                tb.FontStyle = FontStyles.Normal;
+            }
+        }
+
+        private void emailBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            if (string.IsNullOrWhiteSpace(tb.Text))
+            {
+                tb.Text = "Почта";
+                tb.Foreground = Brushes.Gray;
+                tb.FontStyle = FontStyles.Italic;
             }
         }
         private string HashPassword(string password)

@@ -183,7 +183,7 @@ namespace Прототип
             string login = logBox.Text.Trim();
             string password = isPasswordVisible ? visiblePasswordBox.Text.Trim() : passwordBox.Password.Trim();
 
-            // Сброс цвета бордера к дефолтному
+            // Сброс цвета границ
             Brush defaultBrush = SystemColors.ControlDarkBrush;
             logBox.BorderBrush = defaultBrush;
             passwordBox.BorderBrush = defaultBrush;
@@ -191,14 +191,14 @@ namespace Прототип
 
             bool hasError = false;
 
-            // Проверяем логин на пустоту и плейсхолдер
+            // Проверка логина
             if (string.IsNullOrWhiteSpace(login) || login == "Введите логин")
             {
                 logBox.BorderBrush = Brushes.Red;
                 hasError = true;
             }
 
-            // Проверяем пароль на пустоту и плейсхолдер
+            // Проверка пароля
             if (string.IsNullOrWhiteSpace(password) || password == "Введите пароль")
             {
                 if (isPasswordVisible)
@@ -214,7 +214,7 @@ namespace Прототип
                 return;
             }
 
-            // Проверяем капчу при 2 и более ошибках
+            // Проверка CAPTCHA при 2+ неудачных попытках
             if (failedAttempts >= 2)
             {
                 if (captchaInputBox.Text.Trim().ToUpper() != captchaText.ToUpper())
@@ -238,37 +238,43 @@ namespace Прототип
                         cmd.Parameters.AddWithValue("@Login", login);
                         cmd.Parameters.AddWithValue("@PasswordHash", password);
 
-                        SqlDataReader reader = cmd.ExecuteReader();
-
-                        if (reader.Read())
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            int userId = Convert.ToInt32(reader["UserID"]);
-                            string firstName = reader["FirstName"].ToString();
-                            string lastName = reader["LastName"].ToString();
-                            string patronymic = reader["Patronymic"].ToString();
-                            string role = reader["Role"]?.ToString() ?? "";
-
-                            MessageBox.Show($"Добро пожаловать, {lastName} {firstName} {patronymic}!\nРоль: {role}", "Успешный вход", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                            
-                            Properties.Settings.Default.SavedLogin = login;
-                            Properties.Settings.Default.SavedPassword = password;
-                            Properties.Settings.Default.Save();
-
-                            if (role == "Админ")
+                            if (reader.Read())
                             {
-                                var adminWindow = new MainClientWindow(userId);
-                                adminWindow.Show();
-                            }
-                            else if (role == "Клиент")
-                            {
-                                var clientWindow = new MainClientWindow(userId);
-                                clientWindow.Show();
-                            }
+                                int userId = Convert.ToInt32(reader["UserID"]);
+                                string firstName = reader["FirstName"].ToString();
+                                string lastName = reader["LastName"].ToString();
+                                string patronymic = reader["Patronymic"].ToString();
+                                string role = reader["Role"]?.ToString() ?? "";
 
-                            this.Close();
+                                MessageBox.Show($"Добро пожаловать, {lastName} {firstName} {patronymic}!\nРоль: {role}",
+                                                "Успешный вход", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                                // Сохраняем данные
+                                Properties.Settings.Default.SavedLogin = login;
+                                Properties.Settings.Default.SavedPassword = password;
+                                Properties.Settings.Default.Save();
+
+                                if (role == "Админ")
+                                {
+                                    var adminWindow = new MainClientWindow(userId);
+                                    adminWindow.Show();
+                                }
+                                else if (role == "Клиент")
+                                {
+                                    var clientWindow = new MainClientWindow(userId);
+                                    clientWindow.Show();
+                                }
+
+                                this.Close();
+                                return;
+                            }
                         }
+
+                        // Если дошли сюда — пользователь не найден
                         failedAttempts++;
+                        
 
                         if (failedAttempts == 1)
                         {
@@ -297,7 +303,9 @@ namespace Прототип
 
                             if (result == MessageBoxResult.Yes)
                             {
-                                MessageBox.Show("Переход к восстановлению пароля");
+                                PasswordRecovery recoveryWindow = new PasswordRecovery();
+                                recoveryWindow.ShowDialog();
+
                                 return;
                             }
                             else
@@ -305,8 +313,6 @@ namespace Прототип
                                 MessageBox.Show("Пользователь не зарегистрирован. Введите CAPTCHA.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
                         }
-
-                        reader.Close();
                     }
                 }
                 catch (Exception ex)
@@ -315,6 +321,7 @@ namespace Прототип
                 }
             }
         }
+
 
 
 
@@ -343,7 +350,7 @@ namespace Прототип
             string imya = "Системы";
             string otch = "";
 
-            int userId = 0; // сюда получим новый UserID
+            int userId = 0; 
 
             try
             {

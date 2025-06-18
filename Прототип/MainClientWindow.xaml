@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen" Background="White"
         Loaded="MainClientWindow_Loaded"
         MinWidth="800" MinHeight="500"
-        >
+        ResizeMode="CanResize">
 
     <Window.Resources>
         <local:DiscountVisibilityConverter x:Key="DiscountVisibilityConverter"/>
