@@ -31,6 +31,13 @@ namespace Прототип
             public override string ToString() => Name;
         }
 
+        public class UnitItem
+        {
+            public int UnitID { get; set; }
+            public string Name { get; set; }
+            public override string ToString() => Name;
+        }
+
         public AdminWindow(MainClientWindow.Tovar selectedTovar)
         {
             InitializeComponent();
@@ -42,8 +49,9 @@ namespace Прототип
 
             LoadCategories();
             LoadManufacturers();
+            LoadUnits();
             LoadTovarToForm();
-
+           
             IDLabel.Visibility = Visibility.Visible;
 
 
@@ -60,7 +68,7 @@ namespace Прототип
 
             LoadCategories();
             LoadManufacturers();
-
+            LoadUnits();
             IDLabel.Visibility = Visibility.Collapsed;
         }
         private void LoadTovarToForm()
@@ -76,7 +84,9 @@ namespace Прототип
                 .FirstOrDefault(m => m.Name == tovar.Manufacturer);
 
             StockTextBox.Text = tovar.Stock.ToString();
-            UnitTextBox.Text = tovar.Unit;
+            UnitComboBox.SelectedItem = UnitComboBox.Items
+    .OfType<UnitItem>()
+    .FirstOrDefault(u => u.Name == tovar.Unit);
             PriceTextBox.Text = tovar.Price.ToString("F2");
             DiscountTextBox.Text = tovar.Discount.ToString("F2");
             DescriptionTextBox.Text = tovar.Description;
@@ -281,7 +291,7 @@ namespace Прототип
                         CategoryID = @CategoryID,
                         ManufacturerID = @ManufacturerID,
                         Stock = @Stock,
-                        Unit = @Unit,
+                        UnitID = @UnitID,
                         Price = @Price,
                         Discount = @Discount,
                         ImagePath = @ImagePath,
@@ -294,7 +304,7 @@ namespace Прототип
                             cmd.Parameters.AddWithValue("@CategoryID", (CategoryComboBox.SelectedItem as CategoryItem)?.CategoryID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@ManufacturerID", (ManufacturerComboBox.SelectedItem as ManufacturerItem)?.ManufacturerID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Stock", stock);
-                            cmd.Parameters.AddWithValue("@Unit", UnitTextBox.Text);
+                            cmd.Parameters.AddWithValue("@UnitID", (UnitComboBox.SelectedItem as UnitItem)?.UnitID ?? (object)DBNull.Value); 
                             cmd.Parameters.AddWithValue("@Price", price);
                             cmd.Parameters.AddWithValue("@Discount", discount);
                             cmd.Parameters.AddWithValue("@ImagePath", currentImagePath ?? "");
@@ -309,9 +319,9 @@ namespace Прототип
                         // Добавляем новый товар
                         string sql = @"
                     INSERT INTO Products
-                    (Name, CategoryID, ManufacturerID, Stock, Unit, Price, Discount, ImagePath, Description)
+                    (Name, CategoryID, ManufacturerID, Stock, UnitID, Price, Discount, ImagePath, Description)
                     VALUES
-                    (@Name, @CategoryID, @ManufacturerID, @Stock, @Unit, @Price, @Discount, @ImagePath, @Description)";
+                    (@Name, @CategoryID, @ManufacturerID, @Stock, @UnitID, @Price, @Discount, @ImagePath, @Description)";
 
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
                         {
@@ -319,7 +329,7 @@ namespace Прототип
                             cmd.Parameters.AddWithValue("@CategoryID", (CategoryComboBox.SelectedItem as CategoryItem)?.CategoryID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@ManufacturerID", (ManufacturerComboBox.SelectedItem as ManufacturerItem)?.ManufacturerID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Stock", stock);
-                            cmd.Parameters.AddWithValue("@Unit", UnitTextBox.Text);
+                            cmd.Parameters.AddWithValue("@UnitID", (UnitComboBox.SelectedItem as UnitItem)?.UnitID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Price", price);
                             cmd.Parameters.AddWithValue("@Discount", discount);
                             cmd.Parameters.AddWithValue("@ImagePath", currentImagePath ?? "");
@@ -339,6 +349,34 @@ namespace Прототип
                 MessageBox.Show("Ошибка при сохранении: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private void LoadUnits()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT UnitID, Name FROM Unit", conn);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    UnitComboBox.Items.Clear();
+
+                    while (reader.Read())
+                    {
+                        UnitComboBox.Items.Add(new UnitItem
+                        {
+                            UnitID = (int)reader["UnitID"],
+                            Name = reader["Name"].ToString()
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки единиц измерения: " + ex.Message);
+            }
+        }
+
 
 
 

@@ -141,8 +141,9 @@ namespace Прототип
             public string Description { get; set; }      
             public string Manufacturer { get; set; }    
             public decimal Price { get; set; }           
-            public int Stock { get; set; }               
-            public string Unit { get; set; }             
+            public int Stock { get; set; }
+            public string Unit { get; set; }
+
             public decimal Discount { get; set; }
 
             public decimal DiscountedPrice => Discount > 0 ? Price - (Price * Discount / 100) : Price;
@@ -164,14 +165,14 @@ namespace Прототип
     c.Name AS CategoryName,
     p.Description,
     m.Name AS ManufacturerName,
-    p.Unit,
+    u.Name AS UnitName,
     p.Price,
     p.Stock,
     p.Discount
 FROM Products p
 LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
 LEFT JOIN Manufacturers m ON p.ManufacturerID = m.ManufacturerID
-
+LEFT JOIN Unit u ON p.UnitID = u.UnitID 
 ";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -189,7 +190,8 @@ LEFT JOIN Manufacturers m ON p.ManufacturerID = m.ManufacturerID
                             Manufacturer = reader["ManufacturerName"]?.ToString(),
                             Price = Convert.ToDecimal(reader["Price"]),
                             Stock = Convert.ToInt32(reader["Stock"]),
-                            Unit = reader["Unit"]?.ToString(),
+
+                            Unit = reader["UnitName"]?.ToString(),
                             Discount = Convert.ToDecimal(reader["Discount"])
                         };
 

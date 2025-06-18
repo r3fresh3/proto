@@ -42,10 +42,10 @@
 
                 <StackPanel Width="130" Margin="20,0,0,0">
                     <TextBlock Text="Ед.Измерения:" FontWeight="Bold" FontSize="14" FontFamily="Segoe UI" Margin="0,0,0,5"/>
-                    <TextBox x:Name="UnitTextBox" Width="130" 
-                             Height="25" HorizontalAlignment="Left"  
-                             FontSize="12" FontFamily="Segoe UI"
-                             VerticalContentAlignment="Center"/>
+                    <ComboBox x:Name="UnitComboBox" Width="130" Height="25" 
+              FontSize="12" FontFamily="Segoe UI"
+              VerticalContentAlignment="Center"
+              HorizontalAlignment="Left"/>
                 </StackPanel>
             </StackPanel>
 
