@@ -1,0 +1,43 @@
+CREATE OR ALTER PROCEDURE CheckProductDataValidity
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        p.ProductID,
+        p.Name,
+        p.Price,
+        p.Stock,
+        p.Discount,
+        p.Description,
+        p.CategoryID,
+        p.ManufacturerID,
+        p.UnitID,
+        p.ImagePath,
+        -- Признак валидности
+        CASE 
+            WHEN 
+                LEN(p.Name) > 0 AND
+                p.Price >= 0 AND
+                p.Stock >= 0 AND
+                p.Discount >= 0 AND p.Discount <= 100 AND
+                LEN(ISNULL(p.Description, '')) > 0 AND
+                LEN(ISNULL(p.ImagePath, '')) > 0 AND
+                EXISTS (SELECT 1 FROM Categories WHERE CategoryID = p.CategoryID) AND
+                EXISTS (SELECT 1 FROM Manufacturers WHERE ManufacturerID = p.ManufacturerID) AND
+                EXISTS (SELECT 1 FROM Unit WHERE UnitID = p.UnitID)
+            THEN 1
+            ELSE 0
+        END AS IsValid
+    FROM Products p;
+END
+это валидность или нет 1,0 
+так вызвать - EXEC CheckProductDataValidity;
+
+это бд 
+
+BACKUP DATABASE [dm2]
+TO DISK = N'C:\Backups\dm2_backup.bak'
+WITH FORMAT,
+     MEDIANAME = 'dm2Backup',
+     NAME = 'Полная резервная копия базы данных dm2';
