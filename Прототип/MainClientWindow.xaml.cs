@@ -283,10 +283,10 @@ LEFT JOIN Manufacturers m ON p.ManufacturerID = m.ManufacturerID
                     filtered = filtered.OrderByDescending(t => t.Price);
                     break;
             }
-
+            var filteredList = filtered.ToList();
             tovarDataGrid.ItemsSource = filtered.ToList();
             countTextBlock.Text = $"Найдено: {filtered.Count()} из {allTovars.Count}";
-
+            noResultsTextBlock.Visibility = filteredList.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         private void tovarDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {

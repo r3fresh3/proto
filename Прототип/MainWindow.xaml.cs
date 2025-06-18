@@ -34,6 +34,7 @@ namespace Прототип
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             GenerateCaptcha();
+            LoadSavedCredentials();
         }
         private void registrLabel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -175,18 +176,45 @@ namespace Прототип
             }
         }
         private int failedAttempts = 0;
+
+
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             string login = logBox.Text.Trim();
             string password = isPasswordVisible ? visiblePasswordBox.Text.Trim() : passwordBox.Password.Trim();
 
-            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+            // Сброс цвета бордера к дефолтному
+            Brush defaultBrush = SystemColors.ControlDarkBrush;
+            logBox.BorderBrush = defaultBrush;
+            passwordBox.BorderBrush = defaultBrush;
+            visiblePasswordBox.BorderBrush = defaultBrush;
+
+            bool hasError = false;
+
+            // Проверяем логин на пустоту и плейсхолдер
+            if (string.IsNullOrWhiteSpace(login) || login == "Введите логин")
             {
-                MessageBox.Show("Введите логин и пароль.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                logBox.BorderBrush = Brushes.Red;
+                hasError = true;
+            }
+
+            // Проверяем пароль на пустоту и плейсхолдер
+            if (string.IsNullOrWhiteSpace(password) || password == "Введите пароль")
+            {
+                if (isPasswordVisible)
+                    visiblePasswordBox.BorderBrush = Brushes.Red;
+                else
+                    passwordBox.BorderBrush = Brushes.Red;
+                hasError = true;
+            }
+
+            if (hasError)
+            {
+                MessageBox.Show("Пожалуйста, заполните все обязательные поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            
+            // Проверяем капчу при 2 и более ошибках
             if (failedAttempts >= 2)
             {
                 if (captchaInputBox.Text.Trim().ToUpper() != captchaText.ToUpper())
@@ -195,19 +223,14 @@ namespace Прототип
                     GenerateCaptcha();
                     StartLockoutCountdown();
                     return;
-
-                    
                 }
             }
-
-
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    // Удалили проверку по Role — теперь получаем пользователя просто по логину и хэшу пароля
                     string query = "SELECT * FROM Users WHERE Login = @Login AND PasswordHash = @PasswordHash";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -228,6 +251,10 @@ namespace Прототип
                             MessageBox.Show($"Добро пожаловать, {lastName} {firstName} {patronymic}!\nРоль: {role}", "Успешный вход", MessageBoxButton.OK, MessageBoxImage.Information);
 
                             
+                            Properties.Settings.Default.SavedLogin = login;
+                            Properties.Settings.Default.SavedPassword = password;
+                            Properties.Settings.Default.Save();
+
                             if (role == "Админ")
                             {
                                 var adminWindow = new MainClientWindow(userId);
@@ -241,22 +268,41 @@ namespace Прототип
 
                             this.Close();
                         }
-                        else
-                        {
-                            failedAttempts++;
+                        failedAttempts++;
 
-                            if (failedAttempts >= 2)
+                        if (failedAttempts == 1)
+                        {
+                            MessageBox.Show("Пользователь не зарегистрирован.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        else if (failedAttempts == 2)
+                        {
+                            captchaBlock.Visibility = Visibility.Visible;
+                            this.Height = 520;
+                            this.Top = (SystemParameters.WorkArea.Height - this.Height) / 2;
+                            this.Left = (SystemParameters.WorkArea.Width - this.Width) / 2;
+                            GenerateCaptcha();
+
+                            MessageBox.Show("Пользователь не зарегистрирован. Введите CAPTCHA.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        else if (failedAttempts >= 3)
+                        {
+                            captchaBlock.Visibility = Visibility.Visible;
+                            this.Height = 520;
+                            this.Top = (SystemParameters.WorkArea.Height - this.Height) / 2;
+                            this.Left = (SystemParameters.WorkArea.Width - this.Width) / 2;
+                            GenerateCaptcha();
+
+                            var result = MessageBox.Show("Вы ввели неправильный пароль несколько раз.\nХотите восстановить пароль?",
+                                "Восстановление пароля", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                            if (result == MessageBoxResult.Yes)
                             {
-                                captchaBlock.Visibility = Visibility.Visible;
-                                this.Height = 520;
-                                this.Top = (SystemParameters.WorkArea.Height - this.Height) / 2;
-                                this.Left = (SystemParameters.WorkArea.Width - this.Width) / 2;
-                                GenerateCaptcha();
-                                MessageBox.Show("Неверный логин или пароль. Введите CAPTCHA.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                MessageBox.Show("Переход к восстановлению пароля");
+                                return;
                             }
                             else
                             {
-                                MessageBox.Show("Неверный логин или пароль.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                MessageBox.Show("Пользователь не зарегистрирован. Введите CAPTCHA.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
                         }
 
@@ -268,8 +314,28 @@ namespace Прототип
                     MessageBox.Show("Ошибка при подключении: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-
         }
+
+
+
+        // Метод для загрузки сохранённых данных (вызывать при инициализации окна, например, в Loaded событии)
+        private void LoadSavedCredentials()
+        {
+            string savedLogin = Properties.Settings.Default.SavedLogin;
+            string savedPassword = Properties.Settings.Default.SavedPassword;
+
+            if (!string.IsNullOrWhiteSpace(savedLogin))
+                logBox.Text = savedLogin;
+
+            if (!string.IsNullOrWhiteSpace(savedPassword))
+            {
+                if (isPasswordVisible)
+                    visiblePasswordBox.Text = savedPassword;
+                else
+                    passwordBox.Password = savedPassword;
+            }
+        }
+
         private void GuestLoginLabel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             string guestLogin = $"guest_{DateTime.Now.Ticks}";
